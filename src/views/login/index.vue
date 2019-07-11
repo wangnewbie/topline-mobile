@@ -7,10 +7,11 @@
       <van-cell-group>
         <van-field
           v-model="userForm.mobile"
-          required
           clearable
           label-width="60"
-          :error-message="verification"
+          v-validate="'required|mobile'"
+          name = "mobile"
+          :error-message="errors.first('mobile')"
           label="手机号"
           placeholder="请输入手机号"
         />
@@ -18,10 +19,11 @@
           v-model="userForm.code"
           type="password"
           label-width="60"
-          :error-message="messageCode"
+          v-validate="'required'"
+          name = "code"
+          :error-message="errors.first('code')"
           label="验证码"
           placeholder="请输入验证码"
-          required
         >
           <van-button slot="button" size="small" type="primary">发送验证码</van-button>
         </van-field>
@@ -43,24 +45,21 @@ export default {
         mobile: '',
         code: ''
       },
-      verification: '',
-      messageCode: ''
+      myErrors: {
+        mobile: '',
+        code: ''
+      }
     }
+  },
+  created () {
+    this.configFormErrorMessages()
   },
   methods: {
     async handelLogin () {
       try {
-        if (!(/^1[3456789]\d{9}$/.test(this.userForm.mobile))) {
-          this.verification = '手机号码有误，请重填'
+        const valid = await this.$validator.validate()
+        if (!valid) {
           return
-        } else {
-          this.verification = ''
-        }
-        if (!this.userForm.code) {
-          this.messageCode = '验证码不能为空'
-          return
-        } else {
-          this.verification = ''
         }
         const data = await login(this.userForm)
         this.$store.commit('setUser', data)
@@ -68,6 +67,19 @@ export default {
       } catch (error) {
         this.$toast.fail('登录失败')
       }
+    },
+    configFormErrorMessages () {
+      const dict = {
+        custom: {
+          mobile: {
+            required: '手机号不能为空'
+          },
+          code: {
+            required: '验证码不能为空'
+          }
+        }
+      }
+      this.$validator.localize('zh_CN', dict)
     }
   }
 }
