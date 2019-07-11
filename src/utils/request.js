@@ -1,12 +1,16 @@
 import axios from 'axios'
+import store from '@/store'
 
 const request = axios.create({
-  baseURL: 'http://toutiao.course.itcast.cn'
+  baseURL: 'http://ttapi.research.itcast.cn/'
 })
 
 // Add a request interceptor
-axios.interceptors.request.use(function (config) {
+request.interceptors.request.use(function (config) {
   // Do something before request is sent
+  if (store.state.user) {
+    config.headers.Authorization = `Bearer ${store.state.user.token}`
+  }
   return config
 }, function (error) {
   // Do something with request error
@@ -14,9 +18,9 @@ axios.interceptors.request.use(function (config) {
 })
 
 // Add a response interceptor
-axios.interceptors.response.use(function (response) {
+request.interceptors.response.use(function (response) {
   // Do something with response data
-  return response
+  return response.data.data || response.data
 }, function (error) {
   // Do something with response error
   return Promise.reject(error)

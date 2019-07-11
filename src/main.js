@@ -3,9 +3,9 @@ import App from './App.vue'
 import router from '@/router'
 import store from '@/store'
 import 'amfe-flexible'
-import { NavBar, Field, Button, Cell, CellGroup, Toast } from 'vant'
+import { NavBar, Field, Button, Cell, CellGroup, Toast, Tab, Tabs, Tabbar, TabbarItem, List, PullRefresh } from 'vant'
 
-Vue.use(NavBar).use(Field).use(Cell).use(CellGroup).use(Toast).use(Button)
+Vue.use(NavBar).use(Field).use(Cell).use(CellGroup).use(Toast).use(Button).use(Tab).use(Tabs).use(Tabbar).use(TabbarItem).use(List).use(PullRefresh)
 
 Vue.config.productionTip = false
 
