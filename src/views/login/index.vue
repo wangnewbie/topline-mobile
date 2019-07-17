@@ -29,7 +29,7 @@
         </van-field>
       </van-cell-group>
       <div class="loginBtn">
-        <van-button type="info" size="large" @click.prevent="handelLogin">主要按钮</van-button>
+        <van-button type="info" size="large" @click.prevent="handelLogin">登录</van-button>
       </div>
     </form>
   </div>
@@ -42,8 +42,8 @@ export default {
   data () {
     return {
       userForm: {
-        mobile: '',
-        code: ''
+        mobile: '17862884763',
+        code: '246810'
       },
       myErrors: {
         mobile: '',

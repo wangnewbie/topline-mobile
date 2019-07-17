@@ -4,10 +4,13 @@
       fixed
     />
     <van-tabs :offset-top="45" sticky v-model="channelIndex">
+      <div slot="nav-right" class="wap-nav" @click="isChannelShow = true">
+        <van-icon name="wap-nav" />
+      </div>
       <van-tab v-for="item in channels" :key="item.id" :title="item.name">
         <van-pull-refresh v-model="item.pullRefreshLoading" @refresh="onRefresh">
           <van-list
-            v-model="item.loading"
+            v-model="item.upLoading"
             :finished="item.finished"
             finished-text="没有更多了"
             @load="onLoad"
@@ -27,27 +30,46 @@
       <van-tabbar-item icon="video-o">视频</van-tabbar-item>
       <van-tabbar-item icon="contact">我的</van-tabbar-item>
     </van-tabbar>
+    <home-channels
+      v-model="isChannelShow"
+      :user-channels.sync="channels"
+      :active-index.sync="channelIndex"
+    ></home-channels>
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/channels'
 import { getArticles } from '@/api/articles'
+import HomeChannels from './components/channels'
 export default {
   name: 'AppHome',
+  components: {
+    HomeChannels
+  },
   data () {
     return {
       channels: [],
       channelIndex: 0,
-      active: ''
+      active: '',
+      isChannelShow: false
     }
   },
   computed: {
-    activeChannel  () {
+    activeChannel () {
       return this.channels[this.channelIndex]
     }
   },
+  watch: {
+    async '$store.state.user' () {
+      this.channelIndex = 0
+      await this.loadUserChannels()
+      this.activeChannel.upLoading = true
+      this.onLoad()
+    }
+  },
   async created () {
+    // console.log('组件重新 created 渲染了')
     await this.loadUserChannels()
     // await this.loadArticles()
   },
@@ -55,11 +77,17 @@ export default {
     async loadUserChannels () {
       try {
         let channels = []
-        const localChannels = window.localStorage.getItem('channels')
-        if (localChannels) {
-          channels = localChannels
-        } else {
+        if (this.$store.state.user) {
+          // 登录状态
           channels = (await getUserChannels()).channels
+        } else {
+          // 未登录状态
+          const localChannels = JSON.parse(window.localStorage.getItem('channels'))
+          if (localChannels) {
+            channels = localChannels
+          } else {
+            channels = (await getUserChannels()).channels
+          }
         }
         // 对频道中的数据统一处理以供页面使用
         channels.forEach(item => {
@@ -97,7 +125,7 @@ export default {
       // 异步更新数据
       await this.loadArticles()
       // 加载状态结束
-      this.activeChannel.loading = false
+      this.activeChannel.upLoading = false
       // 数据全部加载完成
       // if (this.list.length >= 40) {
       //   this.finished = true
@@ -129,5 +157,13 @@ export default {
 .van-tabs--line {
   margin-top: 90px;
   margin-bottom: 100px;
+}
+.wap-nav {
+  position: sticky;
+  right: 0;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  // opacity: .7;
 }
 </style>

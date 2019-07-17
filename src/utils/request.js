@@ -3,6 +3,7 @@ import store from '@/store'
 
 const request = axios.create({
   baseURL: 'http://ttapi.research.itcast.cn/'
+  // baseURL: 'http://toutiao.course.itcast.cn'
 })
 
 // Add a request interceptor
