@@ -19,7 +19,15 @@
               v-for="item in activeChannel.articles"
               :key="item.art_id"
               :title="item.title"
-            />
+            >
+              <div slot="label">
+                <span>{{ item.aut_name }}</span>
+                &nbsp;
+                <span>{{ item.comm_count }}</span>
+                &nbsp;
+                <span>{{ item.pubdate | relativeTime }}</span>
+              </div>
+            </van-cell>
           </van-list>
         </van-pull-refresh>
       </van-tab>
@@ -42,6 +50,7 @@
 import { getUserChannels } from '@/api/channels'
 import { getArticles } from '@/api/articles'
 import HomeChannels from './components/channels'
+
 export default {
   name: 'AppHome',
   components: {
