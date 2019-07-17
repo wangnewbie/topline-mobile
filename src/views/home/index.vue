@@ -17,7 +17,7 @@
           >
             <van-cell
               v-for="item in activeChannel.articles"
-              :key="item.art_id"
+              :key="item.art_id.toString()"
               :title="item.title">
               <div slot="label">
                 <template v-if="item.cover.type">
@@ -32,6 +32,7 @@
                 <span>{{ item.comm_count }}</span>
                 &nbsp;
                 <span>{{ item.pubdate | relativeTime }}</span>
+                <van-icon class="close" name="close" @click="handleShowMoreAction(item)" />
               </div>
             </van-cell>
           </van-list>
@@ -49,12 +50,33 @@
       :user-channels.sync="channels"
       :active-index.sync="channelIndex"
     ></home-channels>
+    <!-- 文章更多操作 -->
+    <van-dialog :close-on-click-overlay="true" v-model="isMoreActionShow" :show-confirm-button="false">
+      <van-cell-group v-if="!toggleRubbish">
+        <van-cell title="不感兴趣" icon="failure" @click="handleDislick"/>
+        <van-cell title="反馈垃圾内容" is-link icon="warning-o" @click="toggleRubbish = true"/>
+        <van-cell title="拉黑作者" icon="delete"/>
+      </van-cell-group>
+      <van-cell-group v-else>
+        <van-cell icon="arrow-left" @click="toggleRubbish = false"/>
+        <van-cell title="标题夸张"/>
+        <van-cell title="低俗色情"/>
+        <van-cell title="错别字多"/>
+        <van-cell title="旧文重复"/>
+        <van-cell title="广告软文"/>
+        <van-cell title="内容不实"/>
+        <van-cell title="涉嫌违法范围"/>
+        <van-cell title="侵权"/>
+        <van-cell title="其他"/>
+      </van-cell-group>
+    </van-dialog>
+
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/channels'
-import { getArticles } from '@/api/articles'
+import { getArticles, dislikesArticles } from '@/api/articles'
 import HomeChannels from './components/channels'
 
 export default {
@@ -67,7 +89,10 @@ export default {
       channels: [],
       channelIndex: 0,
       active: '',
-      isChannelShow: false
+      isChannelShow: false,
+      currentArticle: null, // 存贮当前更多操作的文章
+      isMoreActionShow: false, // 文章更多操作显示与隐藏
+      toggleRubbish: false // 反馈垃圾内容显示与隐藏
     }
   },
   computed: {
@@ -159,6 +184,19 @@ export default {
         this.$toast('无最新数据')
       }
       this.activeChannel.pullRefreshLoading = false
+    },
+    // 对文章不感兴趣
+    async handleDislick () {
+      await dislikesArticles(this.currentArticle.art_id.toString())
+      this.isMoreActionShow = false
+      const delIndex = this.activeChannel.articles.findIndex(item => item.art_id.toString() === this.currentArticle.art_id.toString())
+      this.activeChannel.articles.splice(delIndex, 1)
+    },
+    // 反馈垃圾内容
+    handleShowMoreAction (item) {
+      this.currentArticle = item
+      this.isMoreActionShow = true
+      this.toggleRubbish = false
     }
   }
 }
@@ -180,5 +218,9 @@ export default {
   align-items: center;
   background: #fff;
   // opacity: .7;
+}
+.close {
+  float: right;
+  font-size: 30px;
 }
 </style>
